@@ -40,6 +40,6 @@
   "homepage": "https://github.com/wagura-maurice/ke-msisdn-validator#readme",
   "devDependencies": {
     "chai": "^4.2.0",
-    "mocha": "^8.2.1"
+    "mocha": "^11.8.0"
   }
 }
