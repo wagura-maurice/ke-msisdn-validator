@@ -1,0 +1,45 @@
+{
+  "name": "ke-msisdn-validator",
+  "version": "1.0.0",
+  "description": "Validate and format Kenyan phone numbers (MSISDN) and identify the telecom provider/operator (Safaricom, Airtel, Telkom, Faiba4g, Equitel). Fork of bnjunge/phone-formatter-ke with updated 2026 prefix data, plus M-PESA compatibility helpers.",
+  "main": "./src/index.js",
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "test": "mocha tests/**/*"
+  },
+  "keywords": [
+    "kenya",
+    "mpesa",
+    "m-pesa",
+    "stk",
+    "lipa",
+    "daraja",
+    "safaricom",
+    "phone",
+    "phone-number",
+    "prefix",
+    "format",
+    "validate",
+    "ke"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wagura-maurice/ke-msisdn-validator.git"
+  },
+  "author": {
+    "name": "Wagura Maurice",
+    "email": "wagura465@gmail.com",
+    "url": "tel:+254718837808"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wagura-maurice/ke-msisdn-validator/issues"
+  },
+  "homepage": "https://github.com/wagura-maurice/ke-msisdn-validator#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1"
+  }
+}
