@@ -100,6 +100,15 @@ are updated as CA Kenya allocations are published.
 npm test
 ```
 
+## Support
+
+If you find this package useful, you can support the developer by buying
+them a coffee:
+
+<a href="https://www.patreon.com/c/montanabay39">
+  <img src="https://img.shields.io/badge/Support%20me%20on-Patreon-F96854?logo=patreon&logoColor=white" alt="Support me on Patreon">
+</a>
+
 ## License
 
 MIT — fork of
