@@ -1,6 +1,6 @@
 {
   "name": "ke-msisdn-validator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Validate and format Kenyan phone numbers (MSISDN) and identify the telecom provider/operator (Safaricom, Airtel, Telkom, Faiba4g, Equitel). Fork of bnjunge/phone-formatter-ke with updated 2026 prefix data, plus M-PESA compatibility helpers.",
   "main": "./src/index.js",
   "files": [
