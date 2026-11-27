@@ -59,10 +59,39 @@ isMpesaCompatible('5111123123');    // false
 
 | Function | Description |
 | --- | --- |
-| `FormatNumbers(phone)` | Normalizes to a 12-digit `254XXXXXXXXX` string, or `"Invalid Phone Number ..."` if the input is not a valid Kenyan number. |
-| `checkOperator(phone)` | Returns the operator a 254-formatted number was **originally** allocated to: `"Safaricom"`, `"Airtel"`, `"Telkom"`, `"Faiba4g"`, `"Equitel"`, or `"Invalid Operator"`. |
-| `isMpesaCompatible(phone)` | **Boolean** — true for any valid Kenyan mobile format (`07x` or `01x`, normalized to 12 digits). Safe pre-check for M-PESA STK push. |
+| `parseMsisdn(phone)` | **v1.1.0** — Rich parse via `libphonenumber-js`: strict E.164 validity, display formats, and operator. Returns `{ msisdn, e164, national, international, operator, isMobile, isValid }` or `null`. |
+| `normalizeMsisdn(phone)` | **v1.1.0** — Clean normalize to `254XXXXXXXXX` or `null` (no sentinel strings). |
+| `normalizeSafaricom(phone)` | **v1.1.0** — The M-Pesa gate: `254XXXXXXXXX` only when the number sits in a Safaricom block, else `null`. One call replaces `FormatNumbers` + `checkOperator` composed by hand. |
+| `isSafaricom(phone)` | **v1.1.0** — Boolean form of the Safaricom gate. |
+| `FormatNumbers(phone)` | Legacy normalizer — returns `"Invalid Phone Number ..."` sentinel on failure. Prefer `normalizeMsisdn` in new code. |
+| `checkOperator(phone)` | Original operator for a 254-formatted number. |
+| `isMpesaCompatible(phone)` | Boolean — any valid Kenyan mobile format (`07x`/`01x`). Safe STK pre-check. |
 | `isStkCompatible(phone)` | Alias of `isMpesaCompatible`. |
+
+### New in v1.1.0
+
+- **`libphonenumber-js` backed `parseMsisdn`** — strict Google-metadata
+  validation plus national/international display formats; operator still
+  comes from the CA prefix tables (libphonenumber carries no KE carrier data).
+- **Bundled TypeScript declarations** (`src/index.d.ts`) — consumers no
+  longer need local `declare module` shims.
+- **Composed Safaricom helpers** — the `normalize → must be Safaricom`
+  pattern M-Pesa apps reimplement is now one call.
+
+```js
+const { parseMsisdn, normalizeSafaricom, isSafaricom } = require('ke-msisdn-validator')
+
+normalizeSafaricom('0712 345 678')   // "254712345678"
+normalizeSafaricom('0735123456')     // null  (Airtel — not M-Pesa)
+isSafaricom('+254118123123')         // true
+
+parseMsisdn('0712 345 678')
+// {
+//   msisdn: '254712345678', e164: '+254712345678',
+//   national: '0712 345678', international: '+254 712 345678',
+//   operator: 'Safaricom', isMobile: true, isValid: true
+// }
+```
 
 ## M-PESA / STK Push guidance (important)
 

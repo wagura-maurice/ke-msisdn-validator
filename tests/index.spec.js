@@ -1,4 +1,4 @@
-const { checkOperator, FormatNumbers, isMpesaCompatible, isStkCompatible } = require('../src/index')
+const { checkOperator, FormatNumbers, isMpesaCompatible, isStkCompatible, normalizeMsisdn, isSafaricom, normalizeSafaricom, parseMsisdn } = require('../src/index')
 const chai = require('chai');
 const expect = chai.expect
 
@@ -111,4 +111,47 @@ describe("Failing ISP/MVNO", function(){
     it("Test Invalid Faiba4g Phone Numbers", function(){
         expect(FormatNumbers('2747111123123')).to.be.equal('Invalid Phone Number 2747111123123')
     })
+})
+
+describe("Test normalizeMsisdn (clean API)", function(){
+    it("normalizes 07xx", function(){ expect(normalizeMsisdn('0712 345 678')).to.be.equal('254712345678') })
+    it("normalizes 01xx", function(){ expect(normalizeMsisdn('0118123123')).to.be.equal('254118123123') })
+    it("returns null on garbage", function(){ expect(normalizeMsisdn('abc')).to.be.equal(null) })
+    it("returns null on non-KE length", function(){ expect(normalizeMsisdn('12345')).to.be.equal(null) })
+})
+
+describe("Test Safaricom gate", function(){
+    it("isSafaricom accepts Safaricom blocks", function(){
+        expect(isSafaricom('0712123123')).to.be.equal(true)
+        expect(isSafaricom('0118123123')).to.be.equal(true)
+    })
+    it("isSafaricom rejects other operators", function(){
+        expect(isSafaricom('0735123123')).to.be.equal(false)  // Airtel
+        expect(isSafaricom('0773123123')).to.be.equal(false)  // Telkom
+    })
+    it("normalizeSafaricom returns msisdn or null", function(){
+        expect(normalizeSafaricom('+254 712 123 123')).to.be.equal('254712123123')
+        expect(normalizeSafaricom('0735123123')).to.be.equal(null)
+    })
+})
+
+describe("Test parseMsisdn (libphonenumber)", function(){
+    it("parses a Safaricom number with all formats", function(){
+        const p = parseMsisdn('0712 345 678')
+        expect(p.msisdn).to.be.equal('254712345678')
+        expect(p.e164).to.be.equal('+254712345678')
+        expect(p.operator).to.be.equal('Safaricom')
+        expect(p.isValid).to.be.equal(true)
+        expect(p.isMobile).to.be.equal(true)
+    })
+    it("parses 01xx numbers", function(){
+        const p = parseMsisdn('0118123123')
+        expect(p.msisdn).to.be.equal('254118123123')
+        expect(p.operator).to.be.equal('Safaricom')
+    })
+    it("identifies Airtel", function(){
+        const p = parseMsisdn('0735123123')
+        expect(p.operator).to.be.equal('Airtel')
+    })
+    it("returns null for garbage", function(){ expect(parseMsisdn('not a number')).to.be.equal(null) })
 })

@@ -16,6 +16,7 @@
  *   isMpesaCompatible() therefore accepts any valid 07x/01x format and
  *   treats the Daraja (M-PESA) API response as the final authority.
  */
+const { parsePhoneNumberFromString } = require('libphonenumber-js')
 
 /**
  * Normalize any Kenyan phone number to 254XXXXXXXXX.
@@ -33,7 +34,8 @@ function FormatNumbers(phone) {
     var _phone = ''
     if (length == 12 && phone_.substring(0, 3) == '254') {
         _phone = phone_
-    } else if (length == 9 && phone_.substring(0, 1) == 7) {
+    } else if (length == 9 && (phone_.substring(0, 1) == '7' || phone_.substring(0, 1) == '1')) {
+        // 9-digit national form without the leading 0: 7xx… or 1xx…
         _phone = '254' + phone_
     } else if (length == 10 && phone_.substring(0, 1) == 0) {
         _phone = '254' + phone_.substring(1, 10)
@@ -149,9 +151,106 @@ function isStkCompatible(phone) {
     return isMpesaCompatible(phone)
 }
 
+/**
+ * Normalize any Kenyan mobile number to `254XXXXXXXXX`, or null.
+ * Clean version of FormatNumbers — returns null instead of an "Invalid…"
+ * sentinel string, which is what callers actually want in validators.
+ *
+ * @param {string} phone
+ * @returns {string|null}
+ */
+function normalizeMsisdn(phone) {
+    const normalized = FormatNumbers(String(phone ?? '').trim())
+    return /^254\d{9}$/.test(normalized) ? normalized : null
+}
+
+/**
+ * True when the number normalizes to a Kenyan mobile MSISDN that sits in a
+ * Safaricom allocation block. This is the one-call form of the pattern M-PESA
+ * apps reimplement (`FormatNumbers` → `checkOperator === 'Safaricom'`).
+ * MNP caveat: prefix = original allocation, not current network.
+ *
+ * @param {string} phone
+ * @returns {boolean}
+ */
+function isSafaricom(phone) {
+    const msisdn = normalizeMsisdn(phone)
+    return msisdn !== null && checkOperator(msisdn) === 'Safaricom'
+}
+
+/**
+ * Normalize to a `254XXXXXXXXX` MSISDN only when the number is in a
+ * Safaricom block — otherwise null. The standard gate for M-Pesa-only
+ * flows (STK push, Lipa Na M-PESA Online).
+ *
+ * @param {string} phone
+ * @returns {string|null}
+ */
+function normalizeSafaricom(phone) {
+    return isSafaricom(phone) ? normalizeMsisdn(phone) : null
+}
+
+/**
+ * Rich parse powered by libphonenumber-js — strict E.164 validity plus
+ * display formats, with the operator resolved from the CA prefix tables
+ * (libphonenumber does not carry Kenyan carrier data, so the two sources
+ * complement each other).
+ *
+ * @param {string} phone - any format; parsed as KE when no country code given
+ * @returns {{
+ *   msisdn: string,          // 254XXXXXXXXX — canonical storage form
+ *   e164: string,            // +254XXXXXXXXX
+ *   national: string,        // 07XX XXX XXX
+ *   international: string,   // +254 7XX XXX XXX
+ *   operator: string,        // Safaricom | Airtel | Telkom | Faiba4g | Equitel | Invalid Operator
+ *   isMobile: boolean,       // libphonenumber type check
+ *   isValid: boolean         // strict E.164 validity for Kenya
+ * } | null} null when the input can't be parsed as a Kenyan number at all.
+ */
+function parseMsisdn(phone) {
+    let parsed
+    try {
+        parsed = parsePhoneNumberFromString(String(phone ?? '').trim(), 'KE')
+    } catch {
+        parsed = undefined
+    }
+    if (!parsed || parsed.country !== 'KE') {
+        // Fall back to the lenient normalizer so formats libphonenumber
+        // doesn't recognize still work for callers that only need msisdn.
+        const fallback = normalizeMsisdn(phone)
+        if (!fallback) return null
+        return {
+            msisdn: fallback,
+            e164: `+${fallback}`,
+            national: `0${fallback.substring(3)}`,
+            international: `+${fallback}`,
+            operator: checkOperator(fallback),
+            isMobile: /^254[17]\d{8}$/.test(fallback),
+            isValid: false,
+        }
+    }
+    const e164 = parsed.number // +254...
+    const msisdn = e164.replace(/^\+/, '')
+    return {
+        msisdn,
+        e164,
+        national: parsed.formatNational(),
+        international: parsed.formatInternational(),
+        operator: checkOperator(msisdn),
+        // KE metadata returns no line type for most mobiles — fall back to
+        // the mobile-pattern check (254[17]…).
+        isMobile: ['MOBILE', 'FIXED_LINE_OR_MOBILE'].includes(parsed.getType()) || /^254[17]\d{8}$/.test(msisdn),
+        isValid: parsed.isValid(),
+    }
+}
+
 module.exports = {
     FormatNumbers: FormatNumbers,
     checkOperator: checkOperator,
     isMpesaCompatible: isMpesaCompatible,
-    isStkCompatible: isStkCompatible
+    isStkCompatible: isStkCompatible,
+    normalizeMsisdn: normalizeMsisdn,
+    isSafaricom: isSafaricom,
+    normalizeSafaricom: normalizeSafaricom,
+    parseMsisdn: parseMsisdn
 }
