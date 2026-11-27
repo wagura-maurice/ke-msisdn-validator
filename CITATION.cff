@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "ke-msisdn-validator"
+abstract: "Validate and format Kenyan phone numbers (MSISDN) and identify
+  the telecom operator (Safaricom, Airtel, Telkom, Faiba4g, Equitel), with
+  M-PESA/STK compatibility helpers and libphonenumber-js parsing."
+authors:
+  - family-names: Maurice
+    given-names: Wagura
+    email: wagura465@gmail.com
+version: 1.1.0
+date-released: "2026-11-27"
+license: MIT
+repository-code: "https://github.com/wagura-maurice/ke-msisdn-validator"
+keywords:
+  - kenya
+  - mpesa
+  - msisdn
+  - phone-validation
+  - safaricom
