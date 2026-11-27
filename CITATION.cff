@@ -9,6 +9,7 @@ authors:
   - family-names: Maurice
     given-names: Wagura
     email: wagura465@gmail.com
+    orcid: "https://orcid.org/0000-0002-6050-6973"
 version: 1.1.0
 date-released: "2026-11-27"
 license: MIT
