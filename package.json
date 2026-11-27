@@ -39,7 +39,8 @@
     "provenance": true
   },
   "bugs": {
-    "url": "https://github.com/wagura-maurice/ke-msisdn-validator/issues"
+    "url": "https://github.com/wagura-maurice/ke-msisdn-validator/issues",
+    "email": "wagura465@gmail.com"
   },
   "homepage": "https://github.com/wagura-maurice/ke-msisdn-validator#readme",
   "devDependencies": {
@@ -49,5 +50,11 @@
   "dependencies": {
     "libphonenumber-js": "^1.13.17"
   },
-  "types": "./src/index.d.ts"
+  "types": "./src/index.d.ts",
+  "maintainers": [
+    {
+      "name": "Wagura Maurice",
+      "email": "wagura465@gmail.com"
+    }
+  ]
 }
